@@ -3,6 +3,7 @@ using UnityEngine;
 public class AudienceMember : MonoBehaviour
 {
     private Animator _animator;
+    private int bug_type = -1;
 
     void Start()
     {
@@ -11,18 +12,30 @@ public class AudienceMember : MonoBehaviour
 
     void Update()
     {
-        
+        // DEBUG: press space to toggle bug
+        // if (Input.GetKeyDown(KeyCode.Space))
+        // {
+        //     Debug.Log("BUG TYPE: " + bug_type);
+        //     if (bug_type == -1)
+        //     {
+        //         SetAudience();
+        //     }
+        //     else
+        //     {
+        //         SetEmpty();
+        //     }
+        // }
     }
 
     void SetAudience()
     {
-        int bug_type = Random.Range(0, 3);
-
-        _animator.play("Audience" + bug_type);
+        bug_type = Random.Range(0, 3);
+        _animator.Play(Animator.StringToHash("Audience" + bug_type));
     }
 
     void SetEmpty()
     {
-        _animator.StopPlayback();
+        _animator.Play(Animator.StringToHash("Idle"));
+        bug_type = -1;
     }
 }
