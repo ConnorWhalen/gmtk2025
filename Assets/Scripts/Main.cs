@@ -7,7 +7,9 @@ using UnityEngine.UI;
 
 public class SlopeDetector : MonoBehaviour
 {
-    public Vector3 groundNormal = Vector3.up;
+    public Vector3 groundUp = Vector3.up;
+    public Vector3 groundRight = Vector3.right;
+    public Vector3 groundForward = Vector3.forward;
     public bool isGrounded = false;
     void OnCollisionStay(Collision collision)
     {
@@ -24,9 +26,13 @@ public class SlopeDetector : MonoBehaviour
                 totalNormal += contact.normal;
                 totalPosition += contact.point;
             }
-            groundNormal = totalNormal.normalized;
+            groundUp = totalNormal.normalized;
+            groundRight = Vector3.Cross(groundUp, Vector3.forward).normalized;
+            groundForward = Vector3.Cross(groundUp, Vector3.right).normalized;
             totalPosition /= contactCount;
-            Debug.DrawRay(totalPosition, groundNormal * 1, Color.white);
+            Debug.DrawRay(totalPosition, groundUp * 1, Color.red);
+            Debug.DrawRay(totalPosition, groundRight * 1, Color.green);
+            Debug.DrawRay(totalPosition, groundForward * 1, Color.blue);
         }
     }
 }
@@ -172,34 +178,56 @@ public class Main : MonoBehaviour
 
     void FixedUpdate()
     {
-        Vector3 ForceVector = new Vector3(0.0f, 0.0f, 0.0f);
-        if (Input.GetKey(KeyCode.D))
-        {
-            ForceVector = new Vector3(InputForce, 0.0f, 0.0f);
-        }
-        if (Input.GetKey(KeyCode.A))
-        {
-            ForceVector = new Vector3(-InputForce, 0.0f, 0.0f);
-        }
-        if (Input.GetKey(KeyCode.W))
-        {
-            ForceVector = new Vector3(0.0f, 0.0f, InputForce);
-        }
-        if (Input.GetKey(KeyCode.S))
-        {
-            ForceVector = new Vector3(0.0f, 0.0f, -InputForce);
-        }
-        var doJump = Input.GetKey(KeyCode.Space);
+        bool doLeft = Input.GetKey(KeyCode.A);
+        bool doRight = Input.GetKey(KeyCode.D);
+        bool doUp = Input.GetKey(KeyCode.W);
+        bool doDown = Input.GetKey(KeyCode.S);
+        bool doJump = Input.GetKey(KeyCode.Space);
         foreach (GameObject bug in bugs)
         {
             Rigidbody rb = bug.GetComponent<Rigidbody>();
-            rb.AddForce(ForceVector, ForceMode.Force);
-            
             SlopeDetector sd = bug.GetComponent<SlopeDetector>();
+            if (doLeft)
+            {
+                rb.AddForce(-sd.groundRight * InputForce, ForceMode.Force);
+            }
+            if (doRight)
+            {
+                rb.AddForce(sd.groundRight * InputForce, ForceMode.Force);
+            }
+            if (doUp)
+            {
+                rb.AddForce(-sd.groundForward * InputForce, ForceMode.Force);
+            }
+            if (doDown)
+            {
+                rb.AddForce(sd.groundForward * InputForce, ForceMode.Force);
+            }
+            
             if (sd.isGrounded && doJump)
             {
-                rb.AddForce(JumpForce * sd.groundNormal, ForceMode.Impulse);
+                var jumpVector = sd.groundUp;
+                if (doLeft)
+                {
+                    jumpVector -= sd.groundRight;
+                }
+                if (doRight)
+                {
+                    jumpVector += sd.groundRight;
+                }
+                if (doUp)
+                {
+                    jumpVector -= sd.groundForward;
+                }
+                if (doDown)
+                {
+                    jumpVector += sd.groundForward;
+                }
+                rb.AddForce(JumpForce * sd.groundUp, ForceMode.Impulse);
                 sd.isGrounded = false;
+                sd.groundUp = Vector3.up;
+                sd.groundRight = Vector3.right;
+                sd.groundForward = Vector3.forward;
             }
         }
     }
