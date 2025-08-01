@@ -5,6 +5,32 @@ using UnityEngine.SceneManagement;
 using Unity.Mathematics;
 using UnityEngine.UI;
 
+public class SlopeDetector : MonoBehaviour
+{
+    public Vector3 groundNormal = Vector3.up;
+    public bool isGrounded = false;
+    void OnCollisionStay(Collision collision)
+    {
+        GameObject other = collision.gameObject;
+        if (other.CompareTag("Ground"))
+        {
+            isGrounded = true;
+            Vector3 totalPosition = Vector3.zero;
+            Vector3 totalNormal = Vector3.zero;
+            int contactCount = 0;
+            foreach (ContactPoint contact in collision.contacts)
+            {
+                contactCount++;
+                totalNormal += contact.normal;
+                totalPosition += contact.point;
+            }
+            groundNormal = totalNormal.normalized;
+            totalPosition /= contactCount;
+            Debug.DrawRay(totalPosition, groundNormal * 1, Color.white);
+        }
+    }
+}
+
 public class Main : MonoBehaviour
 {
     public GameObject mainCamera;
@@ -14,9 +40,13 @@ public class Main : MonoBehaviour
     public GameObject occupiedAudience;
     public GameObject startButton;
     public GameObject curtain;
-    private float InputForce = 100.0f;
+    public PhysicsMaterial bugPhysicsMaterial;
+
+    private float InputForce = 10.0f;
+    private float JumpForce = 1.0f;
     
     List<GameObject> bugs = new List<GameObject>();
+    List<Vector3> bugGroundNormals = new List<Vector3>();
     List<Rigidbody> rigidBodies = new List<Rigidbody>();
 
     List<GameObject> bodys = new List<GameObject>();
@@ -42,12 +72,16 @@ public class Main : MonoBehaviour
             bugs.Add(new GameObject("bug" + bugIndex.ToString()));
             bugs[bugIndex].transform.position = new Vector3(xPosition, yPosition, zPosition);
             SphereCollider sphereCollider = bugs[bugIndex].AddComponent<SphereCollider>();
-            sphereCollider.radius = 0.025f;
+            sphereCollider.radius = 0.3f;
+            sphereCollider.material = bugPhysicsMaterial;
+            bugs[bugIndex].AddComponent<SlopeDetector>();
 
             rigidBodies.Add(bugs[bugIndex].AddComponent<Rigidbody>());
             rigidBodies[bugIndex].useGravity = true;
-            rigidBodies[bugIndex].mass = 1f;
+            rigidBodies[bugIndex].mass = 0.1f;
             rigidBodies[bugIndex].isKinematic = false;
+            rigidBodies[bugIndex].linearDamping = 2.0f;
+            rigidBodies[bugIndex].angularDamping = 0.0f;
 
             bodys.Add(Instantiate(body));
             leftHands.Add(Instantiate(hand));
@@ -122,6 +156,7 @@ public class Main : MonoBehaviour
         }
     }
 
+
     void Update()
     {
         for(int bugIndex = 0; bugIndex < 100; bugIndex++)
@@ -132,15 +167,39 @@ public class Main : MonoBehaviour
             leftHands[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.8f, 0.1f);
             rightHands[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.8f, -0.1f);
         }
+        mainCamera.transform.position = bugs[59].transform.position + new Vector3(0.0f, 5.0f, -5.0f);
     }
 
     void FixedUpdate()
     {
+        Vector3 ForceVector = new Vector3(0.0f, 0.0f, 0.0f);
         if (Input.GetKey(KeyCode.D))
         {
-            foreach (Rigidbody rb in rigidBodies)
+            ForceVector = new Vector3(InputForce, 0.0f, 0.0f);
+        }
+        if (Input.GetKey(KeyCode.A))
+        {
+            ForceVector = new Vector3(-InputForce, 0.0f, 0.0f);
+        }
+        if (Input.GetKey(KeyCode.W))
+        {
+            ForceVector = new Vector3(0.0f, 0.0f, InputForce);
+        }
+        if (Input.GetKey(KeyCode.S))
+        {
+            ForceVector = new Vector3(0.0f, 0.0f, -InputForce);
+        }
+        var doJump = Input.GetKey(KeyCode.Space);
+        foreach (GameObject bug in bugs)
+        {
+            Rigidbody rb = bug.GetComponent<Rigidbody>();
+            rb.AddForce(ForceVector, ForceMode.Force);
+            
+            SlopeDetector sd = bug.GetComponent<SlopeDetector>();
+            if (sd.isGrounded && doJump)
             {
-                rb.AddForce(new Vector3(InputForce, 0.0f, 0.0f), ForceMode.Force);
+                rb.AddForce(JumpForce * sd.groundNormal, ForceMode.Impulse);
+                sd.isGrounded = false;
             }
         }
     }
