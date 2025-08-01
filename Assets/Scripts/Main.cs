@@ -11,6 +11,9 @@ public class SlopeDetector : MonoBehaviour
     public Vector3 groundRight = Vector3.right;
     public Vector3 groundForward = Vector3.forward;
     public bool isGrounded = false;
+
+
+
     void OnCollisionStay(Collision collision)
     {
         GameObject other = collision.gameObject;
@@ -50,6 +53,9 @@ public class Main : MonoBehaviour
 
     private float InputForce = 10.0f;
     private float JumpForce = 1.0f;
+
+    public int playerScore;
+    public Text scoreText;
     
     List<GameObject> bugs = new List<GameObject>();
     List<Vector3> bugGroundNormals = new List<Vector3>();
@@ -183,6 +189,9 @@ public class Main : MonoBehaviour
             rightHands[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.8f, -0.1f);
         }
         mainCamera.transform.position = bugs[55].transform.position + new Vector3(0.0f, 5.0f, -5.0f);
+
+        playerScore = bugs.Count;
+        scoreText.text = playerScore.ToString();
     }
 
     void FixedUpdate()
