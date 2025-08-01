@@ -86,7 +86,7 @@ public class Main : MonoBehaviour
             rigidBodies[bugIndex].useGravity = true;
             rigidBodies[bugIndex].mass = 0.1f;
             rigidBodies[bugIndex].isKinematic = false;
-            rigidBodies[bugIndex].linearDamping = 2.0f;
+            rigidBodies[bugIndex].linearDamping = 0.0f;
             rigidBodies[bugIndex].angularDamping = 0.0f;
 
             bodys.Add(Instantiate(body));
@@ -151,12 +151,12 @@ public class Main : MonoBehaviour
         while(currentTime < endTime)
         {
             currentTime = Mathf.Min(currentTime + Time.deltaTime, endTime);
-            curtains[0].transform.localPosition = new Vector3(-3.0f - 4.0f * currentTime, -2.2f, 2.2f);
-            curtains[1].transform.localPosition = new Vector3(3.0f + 4.0f * currentTime, -2.2f, 2.2f);
+            curtains[0].transform.localPosition = new Vector3(-3.0f - 2.5f * currentTime, -2.2f, 2.2f);
+            curtains[1].transform.localPosition = new Vector3(3.0f + 2.5f * currentTime, -2.2f, 2.2f);
             startButton.transform.localScale = new Vector3(1.0f - currentTime, 1.0f - currentTime, 1.0f - currentTime);
             foreach(GameObject curtain in curtains)
             {
-                curtain.transform.localScale = new Vector3(endTime - currentTime, 1.0f, 1.0f);
+                curtain.transform.localScale = new Vector3(endTime - 0.7f * currentTime, 1.0f, 1.0f);
             }
             yield return null; // resume execution on the next frame
         }
@@ -173,7 +173,7 @@ public class Main : MonoBehaviour
             leftHands[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.8f, 0.1f);
             rightHands[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.8f, -0.1f);
         }
-        mainCamera.transform.position = bugs[59].transform.position + new Vector3(0.0f, 5.0f, -5.0f);
+        mainCamera.transform.position = bugs[55].transform.position + new Vector3(0.0f, 5.0f, -5.0f);
     }
 
     void FixedUpdate()
