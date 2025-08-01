@@ -7,7 +7,10 @@ public class AudienceMember : MonoBehaviour
 
     void Start()
     {
+        Debug.Log("STARTED");
         _animator = GetComponent<Animator>();
+
+        SetAudience();
     }
 
     void Update()
@@ -27,13 +30,13 @@ public class AudienceMember : MonoBehaviour
         // }
     }
 
-    void SetAudience()
+    public void SetAudience()
     {
         bug_type = Random.Range(0, 3);
         _animator.Play(Animator.StringToHash("Audience" + bug_type));
     }
 
-    void SetEmpty()
+    public void SetEmpty()
     {
         _animator.Play(Animator.StringToHash("Idle"));
         bug_type = -1;

@@ -102,10 +102,13 @@ public class Main : MonoBehaviour
             float xPosition = -1.2f + audienceIndex * 0.14f;
             audience.Add(Instantiate(occupiedAudience));
             audience[audienceIndex].transform.parent = mainCamera.transform;
-            audience[audienceIndex].transform.localPosition = new Vector3(xPosition, -0.5f, 0.5f);
+            audience[audienceIndex].transform.localPosition = new Vector3(xPosition, -0.42f, 0.5f);
             audience[audienceIndex].transform.localRotation = Quaternion.identity;
             audience[audienceIndex].transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-            //audience[audienceIndex].GetComponent<Animator>().Play(Animator.StringToHash("Audience" + UnityEngine.Random.Range(0, 3)));
+            audience[audienceIndex].SetActive(true);
+            AudienceMember audienceScript = audience[audienceIndex].GetComponent<AudienceMember>();
+            audienceScript.enabled = true;
+            // audienceScript.SetAudience();
         }
         // middlerow
         for (int audienceIndex = 18; audienceIndex < 18 + 20; audienceIndex++)
@@ -113,10 +116,13 @@ public class Main : MonoBehaviour
             float xPosition = -1.35f + (audienceIndex - 18) * 0.14f;
             audience.Add(Instantiate(occupiedAudience));
             audience[audienceIndex].transform.parent = mainCamera.transform;
-            audience[audienceIndex].transform.localPosition = new Vector3(xPosition, -0.54f, 0.55f);
+            audience[audienceIndex].transform.localPosition = new Vector3(xPosition, -0.448f, 0.55f);
             audience[audienceIndex].transform.localRotation = Quaternion.identity;
             audience[audienceIndex].transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-            //audience[audienceIndex].GetComponent<Animator>().Play(Animator.StringToHash("Audience" + UnityEngine.Random.Range(0, 3)));
+            audience[audienceIndex].SetActive(true);
+            AudienceMember audienceScript = audience[audienceIndex].GetComponent<AudienceMember>();
+            audienceScript.enabled = true;
+            // audienceScript.SetAudience();
         }
         // frontrow
         for (int audienceIndex = 18 + 20; audienceIndex < 18 + 20 + 22; audienceIndex++)
@@ -124,10 +130,13 @@ public class Main : MonoBehaviour
             float xPosition = -1.5f + (audienceIndex - 18 - 20) * 0.14f;
             audience.Add(Instantiate(occupiedAudience));
             audience[audienceIndex].transform.parent = mainCamera.transform;
-            audience[audienceIndex].transform.localPosition = new Vector3(xPosition, -0.58f, 0.6f);
+            audience[audienceIndex].transform.localPosition = new Vector3(xPosition, -0.466f, 0.6f);
             audience[audienceIndex].transform.localRotation = Quaternion.identity;
             audience[audienceIndex].transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-            //audience[audienceIndex].GetComponent<Animator>().Play(Animator.StringToHash("Audience" + UnityEngine.Random.Range(0, 3)));
+            audience[audienceIndex].SetActive(true);
+            AudienceMember audienceScript = audience[audienceIndex].GetComponent<AudienceMember>();
+            audienceScript.enabled = true;
+            // audienceScript.SetAudience();
         }
 
         for (int curtainIndex = 0; curtainIndex < 2; curtainIndex++)

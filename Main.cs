@@ -109,5 +109,3 @@ public class Bugs : MonoBehaviour
     {
     }
 }
-
-List<Bug> ActiveBugs;
