@@ -56,6 +56,8 @@ public class Main : MonoBehaviour
 
     public int playerScore;
     public Text scoreText;
+
+    public int TotalBugs = 50;
     
     List<GameObject> bugs = new List<GameObject>();
     List<Vector3> bugGroundNormals = new List<Vector3>();
@@ -73,15 +75,20 @@ public class Main : MonoBehaviour
 
     void Start()
     {
-        for (int bugIndex = 0; bugIndex < 100; bugIndex++)
+        int root = (int) Mathf.Sqrt(TotalBugs);
+        float centerX = -6.0f;
+        float centerZ = 6.0f;
+        float step = 2.0f / 3.0f;
+        float width = (root - 1.0f) * step;
+        float length = width;
+        for (int bugIndex = 0; bugIndex < TotalBugs; bugIndex++)
         {
-            int row = bugIndex / 10;
-            int column = bugIndex % 10; 
+            int row = bugIndex / root;
+            int column = bugIndex % root;
 
-            float xPosition = -12.0f + 6.0f * column / 9.0f;
+            float xPosition = centerX - (row * step) + width/2.0f;
             float yPosition = 1.0f;
-            float zPosition = 3.0f + 6.0f * row / 9.0f;
-            
+            float zPosition = centerZ + (column * step) - length/2.0f;
 
             bugs.Add(new GameObject("bug" + bugIndex.ToString()));
             bugs[bugIndex].transform.position = new Vector3(xPosition, yPosition, zPosition);
@@ -152,7 +159,10 @@ public class Main : MonoBehaviour
         }
         curtains[0].transform.localPosition = new Vector3(-3.0f, -2.2f, 2.2f);
         curtains[1].transform.localPosition = new Vector3(3.0f, -2.2f, 2.2f);
-        
+        topCurtain = Instantiate(curtain);
+        topCurtain.transform.parent = mainCamera.transform;
+        topCurtain.transform.localRotation = Quaternion.identity;
+        topCurtain.transform.localPosition = new Vector3(0, 1.0f, 2.1f);
 
         Button button = startButton.GetComponent<Button>();
         button.onClick.AddListener(() => StartCoroutine(OpenCurtains()));
@@ -180,15 +190,19 @@ public class Main : MonoBehaviour
 
     void Update()
     {
-        for(int bugIndex = 0; bugIndex < 100; bugIndex++)
+        Vector3 bugCentroid = new Vector3(0.0f, 0.0f, 0.0f);
+        for (int bugIndex = 0; bugIndex < bugs.Count; bugIndex++)
         {
             bodys[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.8f, 0.0f);
             leftFoots[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.0f, 0.1f);
             rightFoots[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.0f, -0.1f);
             leftHands[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.8f, 0.1f);
             rightHands[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.8f, -0.1f);
+            bugCentroid += bugs[bugIndex].transform.position;
         }
-        mainCamera.transform.position = bugs[55].transform.position + new Vector3(0.0f, 5.0f, -5.0f);
+        bugCentroid /= bugs.Count;
+        mainCamera.transform.position = bugCentroid + new Vector3(0.0f, 5.0f, -5.0f);
+        
 
         playerScore = bugs.Count;
         scoreText.text = playerScore.ToString();
