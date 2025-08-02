@@ -75,6 +75,8 @@ public class Main : MonoBehaviour
     
     private Vector3 Level2CameraPosition = new Vector3(0.0f, 97.9f, -918.6f);
 
+    private bool transitionPlaying = false;
+
     List<GameObject> bugs = new List<GameObject>();
     List<Vector3> bugGroundNormals = new List<Vector3>();
     List<Rigidbody> rigidBodies = new List<Rigidbody>();
@@ -188,6 +190,9 @@ public class Main : MonoBehaviour
 
     IEnumerator OpenCurtains()
     {
+        GameObject.Find("IntroSong").GetComponent<AudioSource>().Stop();
+        GameObject.Find("SongTransition").GetComponent<AudioSource>().Play();
+
         float currentTime = 0.0f;
         float endTime = 1.0f;
         while (currentTime < endTime)
@@ -214,6 +219,9 @@ public class Main : MonoBehaviour
 
     IEnumerator CloseCurtains()
     {
+        GameObject.Find("MainSong").GetComponent<AudioSource>().Stop();
+        GameObject.Find("IntroSong").GetComponent<AudioSource>().Play();
+
         scoreText.SetActive(false);
 
         float currentTime = 0.0f;
@@ -334,12 +342,12 @@ public class Main : MonoBehaviour
                     jumpVector += sd.groundForward;
                 }
                 rb.AddForce(JumpForce * sd.groundUp, ForceMode.Impulse);
-                sd.isGrounded = false;
-                sd.groundUp = Vector3.up;
-                sd.groundRight = Vector3.right;
-                sd.groundForward = Vector3.forward;
             }
         }
+        sd.isGrounded = false;
+        sd.groundUp = Vector3.up;
+        sd.groundRight = Vector3.right;
+        sd.groundForward = Vector3.forward;
 
         // Debug.Log("CAMERA FORWARD: " + bugs[0].GetComponent<SlopeDetector>().cameraForward);
         // Debug.Log("CAMERA RIGHT: " + bugs[0].GetComponent<SlopeDetector>().cameraRight);
@@ -349,5 +357,12 @@ public class Main : MonoBehaviour
         {
             StartCoroutine(CloseCurtains());
         }
+
+        bool transitionPlayingNow = GameObject.Find("SongTransition").GetComponent<AudioSource>().isPlaying;
+        if (transitionPlaying && !transitionPlayingNow)
+        {
+            GameObject.Find("MainSong").GetComponent<AudioSource>().Play();
+        }
+        transitionPlaying = transitionPlayingNow;
     }
 }
