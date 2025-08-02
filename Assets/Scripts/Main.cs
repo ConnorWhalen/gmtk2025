@@ -69,7 +69,7 @@ public class Main : MonoBehaviour
     public int playerScore;
     public GameObject scoreText;
 
-    public int TotalBugs = 50;
+    public int TotalBugs = 2;
     public GameObject howToText;
     private bool showHowTo = true;
     
