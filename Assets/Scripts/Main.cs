@@ -13,6 +13,7 @@ public class SlopeDetector : MonoBehaviour
     public Vector3 groundRight = Vector3.right;
     public Vector3 groundForward = Vector3.forward;
     public bool isGrounded = false;
+    public bool isDead = false;
 
     void OnCollisionStay(Collision collision)
     {
@@ -37,6 +38,10 @@ public class SlopeDetector : MonoBehaviour
             Debug.DrawRay(totalPosition, groundRight * 1, Color.green);
             Debug.DrawRay(totalPosition, groundForward * 1, Color.blue);
         }
+        else if (other.CompareTag("Kill"))
+        {
+            isDead = true;
+        }
     }
 }
 
@@ -52,7 +57,7 @@ public class Main : MonoBehaviour
     public PhysicsMaterial bugPhysicsMaterial;
     public GameObject center;
 
-    private float InputForce = 6.0f;
+    private float InputForce = 12.0f;
     private float JumpForce = 1.0f;
 
     public int playerScore;
@@ -102,7 +107,7 @@ public class Main : MonoBehaviour
             rigidBodies[bugIndex].useGravity = true;
             rigidBodies[bugIndex].mass = 0.1f;
             rigidBodies[bugIndex].isKinematic = false;
-            rigidBodies[bugIndex].linearDamping = 0.0f;
+            rigidBodies[bugIndex].linearDamping = 1.5f;
             rigidBodies[bugIndex].angularDamping = 0.0f;
 
             bodys.Add(Instantiate(body));
@@ -199,14 +204,24 @@ public class Main : MonoBehaviour
             rightFoots[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.0f, -0.1f);
             leftHands[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.8f, 0.1f);
             rightHands[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.8f, -0.1f);
+
             bugCentroid += bugs[bugIndex].transform.position;
         }
         bugCentroid /= bugs.Count;
 
         playerScore = bugs.Count;
         scoreText.text = playerScore.ToString();
-        float leaderAngle = Mathf.Rad2Deg * Mathf.Atan2(-bugs[0].transform.position.x, -bugs[0].transform.position.z);
-        center.transform.localEulerAngles = new Vector3(0.0f, leaderAngle, 0.0f);
+
+        if (bugs.Count > 0)
+        {
+            float leaderAngle = Mathf.Rad2Deg * Mathf.Atan2(-bugCentroid.x, -bugCentroid.z);
+            if (leaderAngle < 0.0f) leaderAngle += 360.0f;
+            if (leaderAngle > 360.0f) leaderAngle -= 360.0f;
+            if (leaderAngle - center.transform.localEulerAngles.y > 180.0f) leaderAngle -= 360.0f;
+            if (leaderAngle - center.transform.localEulerAngles.y < -180.0f) leaderAngle += 360.0f;
+            center.transform.localEulerAngles = new Vector3(0.0f, leaderAngle*0.01f + center.transform.localEulerAngles.y*0.99f, 0.0f);
+        }
+
         foreach (GameObject bug in bugs)
         {
             SlopeDetector sd = bug.GetComponent<SlopeDetector>();
@@ -217,6 +232,15 @@ public class Main : MonoBehaviour
 
     void FixedUpdate()
     {
+        for (int bugIndex = bugs.Count - 1; bugIndex >= 0; bugIndex--)
+        {
+            if (bugs[bugIndex].GetComponent<SlopeDetector>().isDead)
+            {
+                Destroy(bugs[bugIndex]);
+                bugs.RemoveAt(bugIndex);
+            }
+        }
+
         bool doLeft = Input.GetKey(KeyCode.A);
         bool doRight = Input.GetKey(KeyCode.D);
         bool doUp = Input.GetKey(KeyCode.W);
