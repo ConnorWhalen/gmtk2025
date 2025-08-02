@@ -91,7 +91,7 @@ public class Main : MonoBehaviour
         int root = (int) Mathf.Sqrt(TotalBugs);
         float centerX = 0.0f;
         float centerZ = -800.0f;
-        float step = 2.0f / 3.0f;
+        float step = 10.0f / 3.0f;
         float width = (root - 1.0f) * step;
         float length = width;
         for (int bugIndex = 0; bugIndex < TotalBugs; bugIndex++)
@@ -106,7 +106,7 @@ public class Main : MonoBehaviour
             bugs.Add(new GameObject("bug" + bugIndex.ToString()));
             bugs[bugIndex].transform.position = new Vector3(xPosition, yPosition, zPosition);
             SphereCollider sphereCollider = bugs[bugIndex].AddComponent<SphereCollider>();
-            sphereCollider.radius = 0.3f;
+            sphereCollider.radius = 3.0f;
             sphereCollider.material = bugPhysicsMaterial;
             bugs[bugIndex].AddComponent<SlopeDetector>();
 
@@ -128,12 +128,12 @@ public class Main : MonoBehaviour
         // backrow
         for (int audienceIndex = 0; audienceIndex < 18; audienceIndex++)
         {
-            float xPosition = -1.2f + audienceIndex * 0.14f;
+            float xPosition = -17.0f + audienceIndex * 2.0f * 17.0f / 17.0f;
             audience.Add(Instantiate(occupiedAudience));
             audience[audienceIndex].transform.parent = mainCamera.transform;
-            audience[audienceIndex].transform.localPosition = new Vector3(xPosition, -0.42f, 0.5f);
+            audience[audienceIndex].transform.localPosition = new Vector3(xPosition, -8.8f, 10.0f + 0.01f * (audienceIndex % 2));
             audience[audienceIndex].transform.localRotation = Quaternion.identity;
-            audience[audienceIndex].transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+            audience[audienceIndex].transform.localScale = new Vector3(8.0f, 8.0f, 1.0f);
             audience[audienceIndex].SetActive(true);
             AudienceMember audienceScript = audience[audienceIndex].GetComponent<AudienceMember>();
             audienceScript.enabled = true;
@@ -141,12 +141,13 @@ public class Main : MonoBehaviour
         // middlerow
         for (int audienceIndex = 18; audienceIndex < 18 + 20; audienceIndex++)
         {
-            float xPosition = -1.35f + (audienceIndex - 18) * 0.14f;
+            float depth = 10.0f * 20.0f / 18.0f;
+            float xPosition = -17.0f * depth / 10.0f + (audienceIndex - 18) * 2.0f * depth / 10.0f * 17.0f / 17.0f;
             audience.Add(Instantiate(occupiedAudience));
             audience[audienceIndex].transform.parent = mainCamera.transform;
-            audience[audienceIndex].transform.localPosition = new Vector3(xPosition, -0.448f, 0.55f);
+            audience[audienceIndex].transform.localPosition = new Vector3(xPosition, -8.8f * depth / 10.0f + 0.1f, depth + 0.01f * (audienceIndex % 2));
             audience[audienceIndex].transform.localRotation = Quaternion.identity;
-            audience[audienceIndex].transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+            audience[audienceIndex].transform.localScale = new Vector3(8.0f, 8.0f, 1.0f);
             audience[audienceIndex].SetActive(true);
             AudienceMember audienceScript = audience[audienceIndex].GetComponent<AudienceMember>();
             audienceScript.enabled = true;
@@ -154,12 +155,13 @@ public class Main : MonoBehaviour
         // frontrow
         for (int audienceIndex = 18 + 20; audienceIndex < 18 + 20 + 22; audienceIndex++)
         {
-            float xPosition = -1.5f + (audienceIndex - 18 - 20) * 0.14f;
+            float depth = 10.0f * 22.0f / 18.0f;
+            float xPosition =  -17.0f * depth / 10.0f + (audienceIndex - 18 - 20) * 2.0f * depth / 10.0f * 17.0f / 17.0f;
             audience.Add(Instantiate(occupiedAudience));
             audience[audienceIndex].transform.parent = mainCamera.transform;
-            audience[audienceIndex].transform.localPosition = new Vector3(xPosition, -0.466f, 0.6f);
+            audience[audienceIndex].transform.localPosition = new Vector3(xPosition, -8.8f * depth / 10.0f + 0.2f, depth + 0.01f * (audienceIndex % 2));
             audience[audienceIndex].transform.localRotation = Quaternion.identity;
-            audience[audienceIndex].transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+            audience[audienceIndex].transform.localScale  = new Vector3(8.0f, 8.0f, 1.0f);
             audience[audienceIndex].SetActive(true);
             AudienceMember audienceScript = audience[audienceIndex].GetComponent<AudienceMember>();
             audienceScript.enabled = true;
@@ -171,10 +173,12 @@ public class Main : MonoBehaviour
             curtains[curtainIndex].transform.parent = mainCamera.transform;
             curtains[curtainIndex].transform.localRotation = Quaternion.identity;
         }
-        curtains[0].transform.localPosition = new Vector3(-3.0f, -2.2f, 2.21f);
-        curtains[1].transform.localPosition = new Vector3(3.0f, -2.2f, 2.2f);
-        curtains[2].transform.localPosition = new Vector3(0, 1.35f, 1.0f);
-        curtains[2].transform.localScale = new Vector3(0.5f, 0.5f, 1.0f);
+        curtains[0].transform.localPosition = new Vector3(-15.0f, -15.0f, 15.1f);
+        curtains[0].transform.localScale = new Vector3(3.27f, 6.4f, 1.0f);
+        curtains[1].transform.localPosition = new Vector3(15.0f, -15.0f, 15.0f);
+        curtains[1].transform.localScale = new Vector3(3.27f, 6.4f, 1.0f);
+        curtains[2].transform.localPosition = new Vector3(0.0f, 9.1f, 12.5f);
+        curtains[2].transform.localScale = new Vector3(6.58f, 1.59f, 1.0f);
 
         Button button = startButton.GetComponent<Button>();
         button.onClick.AddListener(() => StartCoroutine(OpenCurtains()));
@@ -187,12 +191,11 @@ public class Main : MonoBehaviour
         while (currentTime < endTime)
         {
             currentTime = Mathf.Min(currentTime + Time.deltaTime, endTime);
-            curtains[0].transform.localPosition = new Vector3(-3.0f - 2.0f * currentTime, -2.2f, 2.21f);
-            curtains[1].transform.localPosition = new Vector3(3.0f + 2.0f * currentTime, -2.2f, 2.2f);
-            curtains[2].transform.localPosition = new Vector3(0, 1.35f - 0.7f * currentTime, 1.0f);
+            curtains[0].transform.localPosition = new Vector3(-15.0f - 10.0f * currentTime, -15.0f, 15.0f);
+            curtains[1].transform.localPosition = new Vector3(15.0f + 10.0f * currentTime, -15.0f, 15.0f);
 
-            curtains[0].transform.localScale = new Vector3(endTime - 0.7f * currentTime, 1.0f, 1.0f);
-            curtains[1].transform.localScale = new Vector3(endTime - 0.7f * currentTime, 1.0f, 1.0f);
+            curtains[0].transform.localScale = new Vector3(3.27f * (endTime - 0.75f * currentTime), 6.4f, 1.0f);
+            curtains[1].transform.localScale = new Vector3(3.27f * (endTime - 0.75f * currentTime), 6.4f, 1.0f);
 
             if (showHowTo)
             {
@@ -257,6 +260,7 @@ public class Main : MonoBehaviour
             if (leaderAngle - center.transform.localEulerAngles.y > 180.0f) leaderAngle -= 360.0f;
             if (leaderAngle - center.transform.localEulerAngles.y < -180.0f) leaderAngle += 360.0f;
             center.transform.localEulerAngles = new Vector3(0.0f, leaderAngle*0.01f + center.transform.localEulerAngles.y*0.99f, 0.0f);
+            center.transform.localPosition = new Vector3(center.transform.localPosition.x, bugCentroid.y - 50.0f, center.transform.localPosition.z);
         }
 
         foreach (GameObject bug in bugs)
