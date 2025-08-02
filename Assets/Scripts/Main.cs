@@ -7,12 +7,12 @@ using UnityEngine.UI;
 
 public class SlopeDetector : MonoBehaviour
 {
+    public Vector3 cameraRight = Vector3.right;
+    public Vector3 cameraForward = Vector3.forward;
     public Vector3 groundUp = Vector3.up;
     public Vector3 groundRight = Vector3.right;
     public Vector3 groundForward = Vector3.forward;
     public bool isGrounded = false;
-
-
 
     void OnCollisionStay(Collision collision)
     {
@@ -30,8 +30,8 @@ public class SlopeDetector : MonoBehaviour
                 totalPosition += contact.point;
             }
             groundUp = totalNormal.normalized;
-            groundRight = Vector3.Cross(groundUp, Vector3.forward).normalized;
-            groundForward = Vector3.Cross(groundUp, Vector3.right).normalized;
+            groundRight = Vector3.Cross(groundUp, cameraForward).normalized;
+            groundForward = -Vector3.Cross(groundUp, cameraRight).normalized;
             totalPosition /= contactCount;
             Debug.DrawRay(totalPosition, groundUp * 1, Color.red);
             Debug.DrawRay(totalPosition, groundRight * 1, Color.green);
@@ -50,8 +50,9 @@ public class Main : MonoBehaviour
     public GameObject startButton;
     public GameObject curtain;
     public PhysicsMaterial bugPhysicsMaterial;
+    public GameObject center;
 
-    private float InputForce = 10.0f;
+    private float InputForce = 6.0f;
     private float JumpForce = 1.0f;
 
     public int playerScore;
@@ -76,8 +77,8 @@ public class Main : MonoBehaviour
     void Start()
     {
         int root = (int) Mathf.Sqrt(TotalBugs);
-        float centerX = -6.0f;
-        float centerZ = 6.0f;
+        float centerX = 0.0f;
+        float centerZ = -200.0f;
         float step = 2.0f / 3.0f;
         float width = (root - 1.0f) * step;
         float length = width;
@@ -110,6 +111,7 @@ public class Main : MonoBehaviour
             leftFoots.Add(Instantiate(foot));
             rightFoots.Add(Instantiate(foot));
         }
+        mainCamera.transform.parent = center.transform;
 
         // backrow
         for (int audienceIndex = 0; audienceIndex < 18; audienceIndex++)
@@ -168,7 +170,6 @@ public class Main : MonoBehaviour
         button.onClick.AddListener(() => StartCoroutine(OpenCurtains()));
     }
 
-    //Debug.Log(currentTime.ToString("n2"));
     IEnumerator OpenCurtains()
     {
         float currentTime = 0.0f;
@@ -201,11 +202,17 @@ public class Main : MonoBehaviour
             bugCentroid += bugs[bugIndex].transform.position;
         }
         bugCentroid /= bugs.Count;
-        mainCamera.transform.position = bugCentroid + new Vector3(0.0f, 5.0f, -5.0f);
-        
 
         playerScore = bugs.Count;
         scoreText.text = playerScore.ToString();
+        float leaderAngle = Mathf.Rad2Deg * Mathf.Atan2(-bugs[0].transform.position.x, -bugs[0].transform.position.z);
+        center.transform.localEulerAngles = new Vector3(0.0f, leaderAngle, 0.0f);
+        foreach (GameObject bug in bugs)
+        {
+            SlopeDetector sd = bug.GetComponent<SlopeDetector>();
+            sd.cameraRight = center.transform.right;
+            sd.cameraForward = center.transform.forward;
+        }
     }
 
     void FixedUpdate()
@@ -219,21 +226,25 @@ public class Main : MonoBehaviour
         {
             Rigidbody rb = bug.GetComponent<Rigidbody>();
             SlopeDetector sd = bug.GetComponent<SlopeDetector>();
-            if (doLeft)
+            if (sd.isGrounded)
             {
-                rb.AddForce(-sd.groundRight * InputForce, ForceMode.Force);
-            }
+
+            if (doLeft)
+                {
+                    rb.AddForce(-sd.groundRight * InputForce, ForceMode.Force);
+                }
             if (doRight)
             {
                 rb.AddForce(sd.groundRight * InputForce, ForceMode.Force);
             }
             if (doUp)
             {
-                rb.AddForce(-sd.groundForward * InputForce, ForceMode.Force);
+                rb.AddForce(sd.groundForward * InputForce, ForceMode.Force);
             }
             if (doDown)
             {
-                rb.AddForce(sd.groundForward * InputForce, ForceMode.Force);
+                rb.AddForce(-sd.groundForward * InputForce, ForceMode.Force);
+            }
             }
             
             if (sd.isGrounded && doJump)
