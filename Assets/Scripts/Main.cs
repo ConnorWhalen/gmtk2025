@@ -63,8 +63,8 @@ public class Main : MonoBehaviour
     public PhysicsMaterial bugPhysicsMaterial;
     public GameObject center;
 
-    private float InputForce = 48.0f;
-    private float JumpForce = 1.0f;
+    private float InputForce = 500.0f;
+    private float JumpForce = 100.0f;
 
     public int playerScore;
     public GameObject scoreText;
@@ -110,15 +110,15 @@ public class Main : MonoBehaviour
             bugs.Add(new GameObject("bug" + bugIndex.ToString()));
             bugs[bugIndex].transform.position = new Vector3(xPosition, yPosition, zPosition);
             SphereCollider sphereCollider = bugs[bugIndex].AddComponent<SphereCollider>();
-            sphereCollider.radius = 3.0f;
+            sphereCollider.radius = 6.0f;
             sphereCollider.material = bugPhysicsMaterial;
             bugs[bugIndex].AddComponent<SlopeDetector>();
 
             rigidBodies.Add(bugs[bugIndex].AddComponent<Rigidbody>());
             rigidBodies[bugIndex].useGravity = true;
-            rigidBodies[bugIndex].mass = 0.1f;
+            rigidBodies[bugIndex].mass = 0.5f;
             rigidBodies[bugIndex].isKinematic = false;
-            rigidBodies[bugIndex].linearDamping = 1.5f;
+            rigidBodies[bugIndex].linearDamping = 1.0f;
             rigidBodies[bugIndex].angularDamping = 0.0f;
 
             bodys.Add(Instantiate(body));
