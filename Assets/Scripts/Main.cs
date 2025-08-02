@@ -7,12 +7,12 @@ using UnityEngine.UI;
 
 public class SlopeDetector : MonoBehaviour
 {
+    public Vector3 worldRight = Vector3.right;
+    public Vector3 worldForward = Vector3.forward;
     public Vector3 groundUp = Vector3.up;
     public Vector3 groundRight = Vector3.right;
     public Vector3 groundForward = Vector3.forward;
     public bool isGrounded = false;
-
-
 
     void OnCollisionStay(Collision collision)
     {
@@ -30,8 +30,8 @@ public class SlopeDetector : MonoBehaviour
                 totalPosition += contact.point;
             }
             groundUp = totalNormal.normalized;
-            groundRight = Vector3.Cross(groundUp, Vector3.forward).normalized;
-            groundForward = Vector3.Cross(groundUp, Vector3.right).normalized;
+            groundRight = Vector3.Cross(groundUp, worldForward).normalized;
+            groundForward = -Vector3.Cross(groundUp, worldRight).normalized;
             totalPosition /= contactCount;
             Debug.DrawRay(totalPosition, groundUp * 1, Color.red);
             Debug.DrawRay(totalPosition, groundRight * 1, Color.green);
@@ -50,12 +50,16 @@ public class Main : MonoBehaviour
     public GameObject startButton;
     public GameObject curtain;
     public PhysicsMaterial bugPhysicsMaterial;
+    public GameObject center;
 
     private float InputForce = 10.0f;
     private float JumpForce = 1.0f;
 
     public int playerScore;
     public Text scoreText;
+
+    Vector3 worldRight = Vector3.right;
+    Vector3 worldForward = Vector3.forward;
     
     List<GameObject> bugs = new List<GameObject>();
     List<Vector3> bugGroundNormals = new List<Vector3>();
@@ -76,12 +80,12 @@ public class Main : MonoBehaviour
         for (int bugIndex = 0; bugIndex < 100; bugIndex++)
         {
             int row = bugIndex / 10;
-            int column = bugIndex % 10; 
+            int column = bugIndex % 10;
 
-            float xPosition = -12.0f + 6.0f * column / 9.0f;
+            float xPosition = -5.0f + 10.0f * column / 9.0f;
             float yPosition = 1.0f;
-            float zPosition = 3.0f + 6.0f * row / 9.0f;
-            
+            float zPosition = -205.0f + 10.0f * row / 9.0f;
+
 
             bugs.Add(new GameObject("bug" + bugIndex.ToString()));
             bugs[bugIndex].transform.position = new Vector3(xPosition, yPosition, zPosition);
@@ -103,6 +107,7 @@ public class Main : MonoBehaviour
             leftFoots.Add(Instantiate(foot));
             rightFoots.Add(Instantiate(foot));
         }
+        mainCamera.transform.parent = center.transform;
 
         // backrow
         for (int audienceIndex = 0; audienceIndex < 18; audienceIndex++)
@@ -180,7 +185,7 @@ public class Main : MonoBehaviour
 
     void Update()
     {
-        for(int bugIndex = 0; bugIndex < 100; bugIndex++)
+        for (int bugIndex = 0; bugIndex < 100; bugIndex++)
         {
             bodys[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.8f, 0.0f);
             leftFoots[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.0f, 0.1f);
@@ -188,10 +193,18 @@ public class Main : MonoBehaviour
             leftHands[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.8f, 0.1f);
             rightHands[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.8f, -0.1f);
         }
-        mainCamera.transform.position = bugs[55].transform.position + new Vector3(0.0f, 5.0f, -5.0f);
-
         playerScore = bugs.Count;
         scoreText.text = playerScore.ToString();
+        float leaderAngle = Mathf.Rad2Deg * Mathf.Atan2(-bugs[55].transform.position.x, -bugs[55].transform.position.z);
+        center.transform.localEulerAngles = new Vector3(0.0f, leaderAngle, 0.0f);
+        //worldRight = center.transform.localRotation * new Vector3(1.0f, 0.0f, 0.0f);
+        //worldForward = center.transform.localRotation * new Vector3(0.0f, 0.0f, 1.0f);
+        foreach (GameObject bug in bugs)
+        {
+            SlopeDetector sd = bug.GetComponent<SlopeDetector>();
+            sd.worldRight = center.transform.right;
+            sd.worldForward = center.transform.forward;
+        }
     }
 
     void FixedUpdate()
@@ -215,11 +228,11 @@ public class Main : MonoBehaviour
             }
             if (doUp)
             {
-                rb.AddForce(-sd.groundForward * InputForce, ForceMode.Force);
+                rb.AddForce(sd.groundForward * InputForce, ForceMode.Force);
             }
             if (doDown)
             {
-                rb.AddForce(sd.groundForward * InputForce, ForceMode.Force);
+                rb.AddForce(-sd.groundForward * InputForce, ForceMode.Force);
             }
             
             if (sd.isGrounded && doJump)
