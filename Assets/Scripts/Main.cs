@@ -13,6 +13,7 @@ public class SlopeDetector : MonoBehaviour
     public Vector3 groundRight = Vector3.right;
     public Vector3 groundForward = Vector3.forward;
     public bool isGrounded = false;
+    public bool isDead = false;
 
     void OnCollisionStay(Collision collision)
     {
@@ -29,6 +30,11 @@ public class SlopeDetector : MonoBehaviour
                 totalNormal += contact.normal;
                 totalPosition += contact.point;
             }
+
+            GameObject center = GameObject.Find("Center");
+            cameraForward = Quaternion.Euler(0, center.transform.localEulerAngles.y, 0) * Vector3.forward;
+            cameraRight = Vector3.Cross(Vector3.up, cameraForward);
+
             groundUp = totalNormal.normalized;
             groundRight = Vector3.Cross(groundUp, cameraForward).normalized;
             groundForward = -Vector3.Cross(groundUp, cameraRight).normalized;
@@ -36,6 +42,10 @@ public class SlopeDetector : MonoBehaviour
             Debug.DrawRay(totalPosition, groundUp * 1, Color.red);
             Debug.DrawRay(totalPosition, groundRight * 1, Color.green);
             Debug.DrawRay(totalPosition, groundForward * 1, Color.blue);
+        }
+        else if (other.CompareTag("Kill"))
+        {
+            isDead = true;
         }
     }
 }
@@ -52,7 +62,7 @@ public class Main : MonoBehaviour
     public PhysicsMaterial bugPhysicsMaterial;
     public GameObject center;
 
-    private float InputForce = 6.0f;
+    private float InputForce = 12.0f;
     private float JumpForce = 1.0f;
 
     public int playerScore;
@@ -72,7 +82,6 @@ public class Main : MonoBehaviour
     List<GameObject> audience = new List<GameObject>();
     List<GameObject> curtains = new List<GameObject>();
 
-    GameObject topCurtain;
 
     void Start()
     {
@@ -102,7 +111,7 @@ public class Main : MonoBehaviour
             rigidBodies[bugIndex].useGravity = true;
             rigidBodies[bugIndex].mass = 0.1f;
             rigidBodies[bugIndex].isKinematic = false;
-            rigidBodies[bugIndex].linearDamping = 0.0f;
+            rigidBodies[bugIndex].linearDamping = 1.5f;
             rigidBodies[bugIndex].angularDamping = 0.0f;
 
             bodys.Add(Instantiate(body));
@@ -153,18 +162,15 @@ public class Main : MonoBehaviour
             audienceScript.enabled = true;
         }
 
-        for (int curtainIndex = 0; curtainIndex < 2; curtainIndex++)
+        for (int curtainIndex = 0; curtainIndex < 3; curtainIndex++)
         {
             curtains.Add(Instantiate(curtain));
             curtains[curtainIndex].transform.parent = mainCamera.transform;
             curtains[curtainIndex].transform.localRotation = Quaternion.identity;
         }
-        curtains[0].transform.localPosition = new Vector3(-3.0f, -2.2f, 2.2f);
+        curtains[0].transform.localPosition = new Vector3(-3.0f, -2.2f, 2.21f);
         curtains[1].transform.localPosition = new Vector3(3.0f, -2.2f, 2.2f);
-        topCurtain = Instantiate(curtain);
-        topCurtain.transform.parent = mainCamera.transform;
-        topCurtain.transform.localRotation = Quaternion.identity;
-        topCurtain.transform.localPosition = new Vector3(0, 1.0f, 2.1f);
+        curtains[2].transform.localPosition = new Vector3(0, 2.0f, 2.1f);
 
         Button button = startButton.GetComponent<Button>();
         button.onClick.AddListener(() => StartCoroutine(OpenCurtains()));
@@ -177,13 +183,35 @@ public class Main : MonoBehaviour
         while(currentTime < endTime)
         {
             currentTime = Mathf.Min(currentTime + Time.deltaTime, endTime);
-            curtains[0].transform.localPosition = new Vector3(-3.0f - 2.5f * currentTime, -2.2f, 2.2f);
-            curtains[1].transform.localPosition = new Vector3(3.0f + 2.5f * currentTime, -2.2f, 2.2f);
+            curtains[0].transform.localPosition = new Vector3(-3.0f - 2.0f * currentTime, -2.2f, 2.21f);
+            curtains[1].transform.localPosition = new Vector3(3.0f + 2.0f * currentTime, -2.2f, 2.2f);
+            curtains[2].transform.localPosition = new Vector3(0, 2.0f - 0.7f * currentTime, 2.0f);
+
+            curtains[0].transform.localScale = new Vector3(endTime - 0.7f * currentTime, 1.0f, 1.0f);
+            curtains[1].transform.localScale = new Vector3(endTime - 0.7f * currentTime, 1.0f, 1.0f);
+
             startButton.transform.localScale = new Vector3(1.0f - currentTime, 1.0f - currentTime, 1.0f - currentTime);
-            foreach(GameObject curtain in curtains)
-            {
-                curtain.transform.localScale = new Vector3(endTime - 0.7f * currentTime, 1.0f, 1.0f);
-            }
+
+            yield return null; // resume execution on the next frame
+        }
+    }
+
+    IEnumerator CloseCurtains()
+    {
+        float currentTime = 0.0f;
+        float endTime = 1.0f; 
+        while(currentTime < endTime)
+        {
+            currentTime = Mathf.Min(currentTime + Time.deltaTime, endTime);
+            curtains[0].transform.localPosition = new Vector3(-5.0f + 2.0f * currentTime, -2.2f, 2.21f);
+            curtains[1].transform.localPosition = new Vector3(5.0f - 2.0f * currentTime, -2.2f, 2.2f);
+            curtains[2].transform.localPosition = new Vector3(0, 1.3f + 0.7f * currentTime, 2.1f);
+
+            curtains[0].transform.localScale = new Vector3(0.3f + 0.7f * currentTime, 1.0f, 1.0f);
+            curtains[1].transform.localScale = new Vector3(0.3f + 0.7f * currentTime, 1.0f, 1.0f);
+
+            startButton.transform.localScale = new Vector3(currentTime, currentTime, currentTime);
+
             yield return null; // resume execution on the next frame
         }
     }
@@ -199,14 +227,22 @@ public class Main : MonoBehaviour
             rightFoots[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.0f, -0.1f);
             leftHands[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.8f, 0.1f);
             rightHands[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.8f, -0.1f);
+
             bugCentroid += bugs[bugIndex].transform.position;
         }
         bugCentroid /= bugs.Count;
 
         playerScore = bugs.Count;
         scoreText.text = playerScore.ToString();
-        float leaderAngle = Mathf.Rad2Deg * Mathf.Atan2(-bugs[0].transform.position.x, -bugs[0].transform.position.z);
-        center.transform.localEulerAngles = new Vector3(0.0f, leaderAngle, 0.0f);
+
+        if (bugs.Count > 0)
+        {
+            float leaderAngle = Mathf.Rad2Deg * Mathf.Atan2(-bugCentroid.x, -bugCentroid.z);
+            if (leaderAngle - center.transform.localEulerAngles.y > 180.0f) leaderAngle -= 360.0f;
+            if (leaderAngle - center.transform.localEulerAngles.y < -180.0f) leaderAngle += 360.0f;
+            center.transform.localEulerAngles = new Vector3(0.0f, leaderAngle*0.01f + center.transform.localEulerAngles.y*0.99f, 0.0f);
+        }
+
         foreach (GameObject bug in bugs)
         {
             SlopeDetector sd = bug.GetComponent<SlopeDetector>();
@@ -217,6 +253,15 @@ public class Main : MonoBehaviour
 
     void FixedUpdate()
     {
+        for (int bugIndex = bugs.Count - 1; bugIndex >= 0; bugIndex--)
+        {
+            if (bugs[bugIndex].GetComponent<SlopeDetector>().isDead)
+            {
+                Destroy(bugs[bugIndex]);
+                bugs.RemoveAt(bugIndex);
+            }
+        }
+
         bool doLeft = Input.GetKey(KeyCode.A);
         bool doRight = Input.GetKey(KeyCode.D);
         bool doUp = Input.GetKey(KeyCode.W);
@@ -229,24 +274,24 @@ public class Main : MonoBehaviour
             if (sd.isGrounded)
             {
 
-            if (doLeft)
+                if (doLeft)
                 {
                     rb.AddForce(-sd.groundRight * InputForce, ForceMode.Force);
                 }
-            if (doRight)
-            {
-                rb.AddForce(sd.groundRight * InputForce, ForceMode.Force);
+                if (doRight)
+                {
+                    rb.AddForce(sd.groundRight * InputForce, ForceMode.Force);
+                }
+                if (doUp)
+                {
+                    rb.AddForce(sd.groundForward * InputForce, ForceMode.Force);
+                }
+                if (doDown)
+                {
+                    rb.AddForce(-sd.groundForward * InputForce, ForceMode.Force);
+                }
             }
-            if (doUp)
-            {
-                rb.AddForce(sd.groundForward * InputForce, ForceMode.Force);
-            }
-            if (doDown)
-            {
-                rb.AddForce(-sd.groundForward * InputForce, ForceMode.Force);
-            }
-            }
-            
+
             if (sd.isGrounded && doJump)
             {
                 var jumpVector = sd.groundUp;
@@ -272,6 +317,15 @@ public class Main : MonoBehaviour
                 sd.groundRight = Vector3.right;
                 sd.groundForward = Vector3.forward;
             }
+        }
+
+        Debug.Log("CAMERA FORWARD: " + bugs[0].GetComponent<SlopeDetector>().cameraForward);
+        Debug.Log("CAMERA RIGHT: " + bugs[0].GetComponent<SlopeDetector>().cameraRight);
+
+        // Demo curtain close
+        if (Input.GetKey(KeyCode.P))
+        {
+            StartCoroutine(CloseCurtains());
         }
     }
 }

@@ -7,7 +7,6 @@ public class AudienceMember : MonoBehaviour
 
     void Start()
     {
-        Debug.Log("STARTED");
         _animator = GetComponent<Animator>();
 
         SetAudience();
