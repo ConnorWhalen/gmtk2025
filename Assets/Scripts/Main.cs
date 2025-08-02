@@ -162,7 +162,7 @@ public class Main : MonoBehaviour
         topCurtain = Instantiate(curtain);
         topCurtain.transform.parent = mainCamera.transform;
         topCurtain.transform.localRotation = Quaternion.identity;
-        topCurtain.transform.localPosition = new Vector3(0, 1.0f, 2.1f);
+        topCurtain.transform.localPosition = new Vector3(0, 1.3f, 2.1f);
 
         Button button = startButton.GetComponent<Button>();
         button.onClick.AddListener(() => StartCoroutine(OpenCurtains()));
@@ -176,8 +176,8 @@ public class Main : MonoBehaviour
         while(currentTime < endTime)
         {
             currentTime = Mathf.Min(currentTime + Time.deltaTime, endTime);
-            curtains[0].transform.localPosition = new Vector3(-3.0f - 2.5f * currentTime, -2.2f, 2.2f);
-            curtains[1].transform.localPosition = new Vector3(3.0f + 2.5f * currentTime, -2.2f, 2.2f);
+            curtains[0].transform.localPosition = new Vector3(-3.0f - 2.0f * currentTime, -2.2f, 2.2f);
+            curtains[1].transform.localPosition = new Vector3(3.0f + 2.0f * currentTime, -2.2f, 2.2f);
             startButton.transform.localScale = new Vector3(1.0f - currentTime, 1.0f - currentTime, 1.0f - currentTime);
             foreach(GameObject curtain in curtains)
             {
