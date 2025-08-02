@@ -1275,7 +1275,7 @@ MonoBehaviour:
   body: {fileID: 3836855884579226172, guid: 995ca765b198a6bab86b89aef816eed2, type: 3}
   hand: {fileID: 2154176564176682679, guid: 79fc646d56099b8b09b1d09eca131c7d, type: 3}
   foot: {fileID: 3960434019364849591, guid: 91534778c6514f6ed98ff21fd2870f8a, type: 3}
-  occupiedAudience: {fileID: -2253911629886400664, guid: 04d659c459818419a94d6190261e7301, type: 3}
+  occupiedAudience: {fileID: 8668953489895211344, guid: fde5ad1bec4094a7e98d252afffb308a, type: 3}
   startButton: {fileID: 981719492}
   curtain: {fileID: -2253911629886400664, guid: e057c75d94fbf4782acaf933f231b447, type: 3}
   bugPhysicsMaterial: {fileID: 13400000, guid: 5d0257c5d456f487baa60abfcac59094, type: 2}

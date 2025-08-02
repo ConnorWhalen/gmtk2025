@@ -69,6 +69,8 @@ public class Main : MonoBehaviour
     List<GameObject> audience = new List<GameObject>();
     List<GameObject> curtains = new List<GameObject>();
 
+    GameObject topCurtain;
+
     void Start()
     {
         for (int bugIndex = 0; bugIndex < 100; bugIndex++)
@@ -114,7 +116,6 @@ public class Main : MonoBehaviour
             audience[audienceIndex].SetActive(true);
             AudienceMember audienceScript = audience[audienceIndex].GetComponent<AudienceMember>();
             audienceScript.enabled = true;
-            // audienceScript.SetAudience();
         }
         // middlerow
         for (int audienceIndex = 18; audienceIndex < 18 + 20; audienceIndex++)
@@ -128,7 +129,6 @@ public class Main : MonoBehaviour
             audience[audienceIndex].SetActive(true);
             AudienceMember audienceScript = audience[audienceIndex].GetComponent<AudienceMember>();
             audienceScript.enabled = true;
-            // audienceScript.SetAudience();
         }
         // frontrow
         for (int audienceIndex = 18 + 20; audienceIndex < 18 + 20 + 22; audienceIndex++)
@@ -142,7 +142,6 @@ public class Main : MonoBehaviour
             audience[audienceIndex].SetActive(true);
             AudienceMember audienceScript = audience[audienceIndex].GetComponent<AudienceMember>();
             audienceScript.enabled = true;
-            // audienceScript.SetAudience();
         }
 
         for (int curtainIndex = 0; curtainIndex < 2; curtainIndex++)
@@ -153,6 +152,7 @@ public class Main : MonoBehaviour
         }
         curtains[0].transform.localPosition = new Vector3(-3.0f, -2.2f, 2.2f);
         curtains[1].transform.localPosition = new Vector3(3.0f, -2.2f, 2.2f);
+        
 
         Button button = startButton.GetComponent<Button>();
         button.onClick.AddListener(() => StartCoroutine(OpenCurtains()));
