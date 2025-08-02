@@ -78,7 +78,7 @@ public class Main : MonoBehaviour
     {
         int root = (int) Mathf.Sqrt(TotalBugs);
         float centerX = 0.0f;
-        float centerZ = -200.0f;
+        float centerZ = -800.0f;
         float step = 2.0f / 3.0f;
         float width = (root - 1.0f) * step;
         float length = width;
@@ -88,7 +88,7 @@ public class Main : MonoBehaviour
             int column = bugIndex % root;
 
             float xPosition = centerX - (row * step) + width/2.0f;
-            float yPosition = 1.0f;
+            float yPosition = 10.0f;
             float zPosition = centerZ + (column * step) - length/2.0f;
 
             bugs.Add(new GameObject("bug" + bugIndex.ToString()));
