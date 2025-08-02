@@ -125,7 +125,7 @@ ScriptedImporter:
   animatedSpriteImportData:
   - name: curtain
     originalName: 
-    pivot: {x: 0.5, y: -0.04483431}
+    pivot: {x: 0.5, y: -0.044487428}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 
@@ -134,7 +134,7 @@ ScriptedImporter:
       x: 4
       y: 4
       width: 960
-      height: 513
+      height: 517
     spriteID: 209b9d99a67984234b5465610ae9efd6
     spriteBone: []
     spriteOutline: []
@@ -165,7 +165,7 @@ ScriptedImporter:
         x: 0
         y: 23
         width: 960
-        height: 513
+        height: 517
       spriteId: 209b9d99a67984234b5465610ae9efd6
     linkedCells: []
     parentIndex: -1

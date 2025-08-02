@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Unity.Mathematics;
@@ -66,9 +67,11 @@ public class Main : MonoBehaviour
     private float JumpForce = 1.0f;
 
     public int playerScore;
-    public Text scoreText;
+    public GameObject scoreText;
 
     public int TotalBugs = 50;
+    public GameObject howToText;
+    private bool showHowTo = true;
     
     List<GameObject> bugs = new List<GameObject>();
     List<Vector3> bugGroundNormals = new List<Vector3>();
@@ -170,7 +173,8 @@ public class Main : MonoBehaviour
         }
         curtains[0].transform.localPosition = new Vector3(-3.0f, -2.2f, 2.21f);
         curtains[1].transform.localPosition = new Vector3(3.0f, -2.2f, 2.2f);
-        curtains[2].transform.localPosition = new Vector3(0, 2.0f, 2.1f);
+        curtains[2].transform.localPosition = new Vector3(0, 1.35f, 1.0f);
+        curtains[2].transform.localScale = new Vector3(0.5f, 0.5f, 1.0f);
 
         Button button = startButton.GetComponent<Button>();
         button.onClick.AddListener(() => StartCoroutine(OpenCurtains()));
@@ -179,25 +183,34 @@ public class Main : MonoBehaviour
     IEnumerator OpenCurtains()
     {
         float currentTime = 0.0f;
-        float endTime = 1.0f; 
-        while(currentTime < endTime)
+        float endTime = 1.0f;
+        while (currentTime < endTime)
         {
             currentTime = Mathf.Min(currentTime + Time.deltaTime, endTime);
             curtains[0].transform.localPosition = new Vector3(-3.0f - 2.0f * currentTime, -2.2f, 2.21f);
             curtains[1].transform.localPosition = new Vector3(3.0f + 2.0f * currentTime, -2.2f, 2.2f);
-            curtains[2].transform.localPosition = new Vector3(0, 2.0f - 0.7f * currentTime, 2.0f);
+            curtains[2].transform.localPosition = new Vector3(0, 1.35f - 0.7f * currentTime, 1.0f);
 
             curtains[0].transform.localScale = new Vector3(endTime - 0.7f * currentTime, 1.0f, 1.0f);
             curtains[1].transform.localScale = new Vector3(endTime - 0.7f * currentTime, 1.0f, 1.0f);
+
+            if (showHowTo)
+            {
+                howToText.transform.localScale = new Vector3(1.0f - currentTime, 1.0f - currentTime, 1.0f - currentTime);
+            }
 
             startButton.transform.localScale = new Vector3(1.0f - currentTime, 1.0f - currentTime, 1.0f - currentTime);
 
             yield return null; // resume execution on the next frame
         }
+        scoreText.SetActive(true);
+        showHowTo = false;
     }
 
     IEnumerator CloseCurtains()
     {
+        scoreText.SetActive(false);
+
         float currentTime = 0.0f;
         float endTime = 1.0f; 
         while(currentTime < endTime)
@@ -205,7 +218,7 @@ public class Main : MonoBehaviour
             currentTime = Mathf.Min(currentTime + Time.deltaTime, endTime);
             curtains[0].transform.localPosition = new Vector3(-5.0f + 2.0f * currentTime, -2.2f, 2.21f);
             curtains[1].transform.localPosition = new Vector3(5.0f - 2.0f * currentTime, -2.2f, 2.2f);
-            curtains[2].transform.localPosition = new Vector3(0, 1.3f + 0.7f * currentTime, 2.1f);
+            curtains[2].transform.localPosition = new Vector3(0, 0.65f + 0.7f * currentTime, 1.0f);
 
             curtains[0].transform.localScale = new Vector3(0.3f + 0.7f * currentTime, 1.0f, 1.0f);
             curtains[1].transform.localScale = new Vector3(0.3f + 0.7f * currentTime, 1.0f, 1.0f);
@@ -233,7 +246,10 @@ public class Main : MonoBehaviour
         bugCentroid /= bugs.Count;
 
         playerScore = bugs.Count;
-        scoreText.text = playerScore.ToString();
+        if (scoreText.activeInHierarchy)
+        {
+            scoreText.GetComponent<TMP_Text>().text = playerScore.ToString();
+        }
 
         if (bugs.Count > 0)
         {
@@ -319,8 +335,8 @@ public class Main : MonoBehaviour
             }
         }
 
-        Debug.Log("CAMERA FORWARD: " + bugs[0].GetComponent<SlopeDetector>().cameraForward);
-        Debug.Log("CAMERA RIGHT: " + bugs[0].GetComponent<SlopeDetector>().cameraRight);
+        // Debug.Log("CAMERA FORWARD: " + bugs[0].GetComponent<SlopeDetector>().cameraForward);
+        // Debug.Log("CAMERA RIGHT: " + bugs[0].GetComponent<SlopeDetector>().cameraRight);
 
         // Demo curtain close
         if (Input.GetKey(KeyCode.P))
