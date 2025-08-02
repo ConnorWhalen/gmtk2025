@@ -7,8 +7,8 @@ using UnityEngine.UI;
 
 public class SlopeDetector : MonoBehaviour
 {
-    public Vector3 worldRight = Vector3.right;
-    public Vector3 worldForward = Vector3.forward;
+    public Vector3 cameraRight = Vector3.right;
+    public Vector3 cameraForward = Vector3.forward;
     public Vector3 groundUp = Vector3.up;
     public Vector3 groundRight = Vector3.right;
     public Vector3 groundForward = Vector3.forward;
@@ -30,8 +30,8 @@ public class SlopeDetector : MonoBehaviour
                 totalPosition += contact.point;
             }
             groundUp = totalNormal.normalized;
-            groundRight = Vector3.Cross(groundUp, worldForward).normalized;
-            groundForward = -Vector3.Cross(groundUp, worldRight).normalized;
+            groundRight = Vector3.Cross(groundUp, cameraForward).normalized;
+            groundForward = -Vector3.Cross(groundUp, cameraRight).normalized;
             totalPosition /= contactCount;
             Debug.DrawRay(totalPosition, groundUp * 1, Color.red);
             Debug.DrawRay(totalPosition, groundRight * 1, Color.green);
@@ -52,14 +52,13 @@ public class Main : MonoBehaviour
     public PhysicsMaterial bugPhysicsMaterial;
     public GameObject center;
 
-    private float InputForce = 10.0f;
+    private float InputForce = 6.0f;
     private float JumpForce = 1.0f;
 
     public int playerScore;
     public Text scoreText;
 
-    Vector3 worldRight = Vector3.right;
-    Vector3 worldForward = Vector3.forward;
+    public int TotalBugs = 50;
     
     List<GameObject> bugs = new List<GameObject>();
     List<Vector3> bugGroundNormals = new List<Vector3>();
@@ -77,15 +76,20 @@ public class Main : MonoBehaviour
 
     void Start()
     {
-        for (int bugIndex = 0; bugIndex < 100; bugIndex++)
+        int root = (int) Mathf.Sqrt(TotalBugs);
+        float centerX = 0.0f;
+        float centerZ = -200.0f;
+        float step = 2.0f / 3.0f;
+        float width = (root - 1.0f) * step;
+        float length = width;
+        for (int bugIndex = 0; bugIndex < TotalBugs; bugIndex++)
         {
-            int row = bugIndex / 10;
-            int column = bugIndex % 10;
+            int row = bugIndex / root;
+            int column = bugIndex % root;
 
-            float xPosition = -5.0f + 10.0f * column / 9.0f;
+            float xPosition = centerX - (row * step) + width/2.0f;
             float yPosition = 1.0f;
-            float zPosition = -205.0f + 10.0f * row / 9.0f;
-
+            float zPosition = centerZ + (column * step) - length/2.0f;
 
             bugs.Add(new GameObject("bug" + bugIndex.ToString()));
             bugs[bugIndex].transform.position = new Vector3(xPosition, yPosition, zPosition);
@@ -157,13 +161,15 @@ public class Main : MonoBehaviour
         }
         curtains[0].transform.localPosition = new Vector3(-3.0f, -2.2f, 2.2f);
         curtains[1].transform.localPosition = new Vector3(3.0f, -2.2f, 2.2f);
-        
+        topCurtain = Instantiate(curtain);
+        topCurtain.transform.parent = mainCamera.transform;
+        topCurtain.transform.localRotation = Quaternion.identity;
+        topCurtain.transform.localPosition = new Vector3(0, 1.0f, 2.1f);
 
         Button button = startButton.GetComponent<Button>();
         button.onClick.AddListener(() => StartCoroutine(OpenCurtains()));
     }
 
-    //Debug.Log(currentTime.ToString("n2"));
     IEnumerator OpenCurtains()
     {
         float currentTime = 0.0f;
@@ -185,25 +191,27 @@ public class Main : MonoBehaviour
 
     void Update()
     {
-        for (int bugIndex = 0; bugIndex < 100; bugIndex++)
+        Vector3 bugCentroid = new Vector3(0.0f, 0.0f, 0.0f);
+        for (int bugIndex = 0; bugIndex < bugs.Count; bugIndex++)
         {
             bodys[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.8f, 0.0f);
             leftFoots[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.0f, 0.1f);
             rightFoots[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.0f, -0.1f);
             leftHands[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.8f, 0.1f);
             rightHands[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.8f, -0.1f);
+            bugCentroid += bugs[bugIndex].transform.position;
         }
+        bugCentroid /= bugs.Count;
+
         playerScore = bugs.Count;
         scoreText.text = playerScore.ToString();
-        float leaderAngle = Mathf.Rad2Deg * Mathf.Atan2(-bugs[55].transform.position.x, -bugs[55].transform.position.z);
+        float leaderAngle = Mathf.Rad2Deg * Mathf.Atan2(-bugs[0].transform.position.x, -bugs[0].transform.position.z);
         center.transform.localEulerAngles = new Vector3(0.0f, leaderAngle, 0.0f);
-        //worldRight = center.transform.localRotation * new Vector3(1.0f, 0.0f, 0.0f);
-        //worldForward = center.transform.localRotation * new Vector3(0.0f, 0.0f, 1.0f);
         foreach (GameObject bug in bugs)
         {
             SlopeDetector sd = bug.GetComponent<SlopeDetector>();
-            sd.worldRight = center.transform.right;
-            sd.worldForward = center.transform.forward;
+            sd.cameraRight = center.transform.right;
+            sd.cameraForward = center.transform.forward;
         }
     }
 
@@ -218,10 +226,13 @@ public class Main : MonoBehaviour
         {
             Rigidbody rb = bug.GetComponent<Rigidbody>();
             SlopeDetector sd = bug.GetComponent<SlopeDetector>();
-            if (doLeft)
+            if (sd.isGrounded)
             {
-                rb.AddForce(-sd.groundRight * InputForce, ForceMode.Force);
-            }
+
+            if (doLeft)
+                {
+                    rb.AddForce(-sd.groundRight * InputForce, ForceMode.Force);
+                }
             if (doRight)
             {
                 rb.AddForce(sd.groundRight * InputForce, ForceMode.Force);
@@ -233,6 +244,7 @@ public class Main : MonoBehaviour
             if (doDown)
             {
                 rb.AddForce(-sd.groundForward * InputForce, ForceMode.Force);
+            }
             }
             
             if (sd.isGrounded && doJump)
