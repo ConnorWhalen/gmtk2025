@@ -30,6 +30,11 @@ public class SlopeDetector : MonoBehaviour
                 totalNormal += contact.normal;
                 totalPosition += contact.point;
             }
+
+            GameObject center = GameObject.Find("Center");
+            cameraForward = Quaternion.Euler(0, center.transform.localEulerAngles.y, 0) * Vector3.forward;
+            cameraRight = Vector3.Cross(Vector3.up, cameraForward);
+
             groundUp = totalNormal.normalized;
             groundRight = Vector3.Cross(groundUp, cameraForward).normalized;
             groundForward = -Vector3.Cross(groundUp, cameraRight).normalized;
@@ -77,7 +82,6 @@ public class Main : MonoBehaviour
     List<GameObject> audience = new List<GameObject>();
     List<GameObject> curtains = new List<GameObject>();
 
-    GameObject topCurtain;
 
     void Start()
     {
@@ -158,18 +162,15 @@ public class Main : MonoBehaviour
             audienceScript.enabled = true;
         }
 
-        for (int curtainIndex = 0; curtainIndex < 2; curtainIndex++)
+        for (int curtainIndex = 0; curtainIndex < 3; curtainIndex++)
         {
             curtains.Add(Instantiate(curtain));
             curtains[curtainIndex].transform.parent = mainCamera.transform;
             curtains[curtainIndex].transform.localRotation = Quaternion.identity;
         }
-        curtains[0].transform.localPosition = new Vector3(-3.0f, -2.2f, 2.2f);
+        curtains[0].transform.localPosition = new Vector3(-3.0f, -2.2f, 2.21f);
         curtains[1].transform.localPosition = new Vector3(3.0f, -2.2f, 2.2f);
-        topCurtain = Instantiate(curtain);
-        topCurtain.transform.parent = mainCamera.transform;
-        topCurtain.transform.localRotation = Quaternion.identity;
-        topCurtain.transform.localPosition = new Vector3(0, 1.3f, 2.1f);
+        curtains[2].transform.localPosition = new Vector3(0, 2.0f, 2.1f);
 
         Button button = startButton.GetComponent<Button>();
         button.onClick.AddListener(() => StartCoroutine(OpenCurtains()));
@@ -182,13 +183,35 @@ public class Main : MonoBehaviour
         while(currentTime < endTime)
         {
             currentTime = Mathf.Min(currentTime + Time.deltaTime, endTime);
-            curtains[0].transform.localPosition = new Vector3(-3.0f - 2.0f * currentTime, -2.2f, 2.2f);
+            curtains[0].transform.localPosition = new Vector3(-3.0f - 2.0f * currentTime, -2.2f, 2.21f);
             curtains[1].transform.localPosition = new Vector3(3.0f + 2.0f * currentTime, -2.2f, 2.2f);
+            curtains[2].transform.localPosition = new Vector3(0, 2.0f - 0.7f * currentTime, 2.0f);
+
+            curtains[0].transform.localScale = new Vector3(endTime - 0.7f * currentTime, 1.0f, 1.0f);
+            curtains[1].transform.localScale = new Vector3(endTime - 0.7f * currentTime, 1.0f, 1.0f);
+
             startButton.transform.localScale = new Vector3(1.0f - currentTime, 1.0f - currentTime, 1.0f - currentTime);
-            foreach(GameObject curtain in curtains)
-            {
-                curtain.transform.localScale = new Vector3(endTime - 0.7f * currentTime, 1.0f, 1.0f);
-            }
+
+            yield return null; // resume execution on the next frame
+        }
+    }
+
+    IEnumerator CloseCurtains()
+    {
+        float currentTime = 0.0f;
+        float endTime = 1.0f; 
+        while(currentTime < endTime)
+        {
+            currentTime = Mathf.Min(currentTime + Time.deltaTime, endTime);
+            curtains[0].transform.localPosition = new Vector3(-5.0f + 2.0f * currentTime, -2.2f, 2.21f);
+            curtains[1].transform.localPosition = new Vector3(5.0f - 2.0f * currentTime, -2.2f, 2.2f);
+            curtains[2].transform.localPosition = new Vector3(0, 1.3f + 0.7f * currentTime, 2.1f);
+
+            curtains[0].transform.localScale = new Vector3(0.3f + 0.7f * currentTime, 1.0f, 1.0f);
+            curtains[1].transform.localScale = new Vector3(0.3f + 0.7f * currentTime, 1.0f, 1.0f);
+
+            startButton.transform.localScale = new Vector3(currentTime, currentTime, currentTime);
+
             yield return null; // resume execution on the next frame
         }
     }
@@ -215,8 +238,6 @@ public class Main : MonoBehaviour
         if (bugs.Count > 0)
         {
             float leaderAngle = Mathf.Rad2Deg * Mathf.Atan2(-bugCentroid.x, -bugCentroid.z);
-            if (leaderAngle < 0.0f) leaderAngle += 360.0f;
-            if (leaderAngle > 360.0f) leaderAngle -= 360.0f;
             if (leaderAngle - center.transform.localEulerAngles.y > 180.0f) leaderAngle -= 360.0f;
             if (leaderAngle - center.transform.localEulerAngles.y < -180.0f) leaderAngle += 360.0f;
             center.transform.localEulerAngles = new Vector3(0.0f, leaderAngle*0.01f + center.transform.localEulerAngles.y*0.99f, 0.0f);
@@ -253,24 +274,24 @@ public class Main : MonoBehaviour
             if (sd.isGrounded)
             {
 
-            if (doLeft)
+                if (doLeft)
                 {
                     rb.AddForce(-sd.groundRight * InputForce, ForceMode.Force);
                 }
-            if (doRight)
-            {
-                rb.AddForce(sd.groundRight * InputForce, ForceMode.Force);
+                if (doRight)
+                {
+                    rb.AddForce(sd.groundRight * InputForce, ForceMode.Force);
+                }
+                if (doUp)
+                {
+                    rb.AddForce(sd.groundForward * InputForce, ForceMode.Force);
+                }
+                if (doDown)
+                {
+                    rb.AddForce(-sd.groundForward * InputForce, ForceMode.Force);
+                }
             }
-            if (doUp)
-            {
-                rb.AddForce(sd.groundForward * InputForce, ForceMode.Force);
-            }
-            if (doDown)
-            {
-                rb.AddForce(-sd.groundForward * InputForce, ForceMode.Force);
-            }
-            }
-            
+
             if (sd.isGrounded && doJump)
             {
                 var jumpVector = sd.groundUp;
@@ -296,6 +317,15 @@ public class Main : MonoBehaviour
                 sd.groundRight = Vector3.right;
                 sd.groundForward = Vector3.forward;
             }
+        }
+
+        Debug.Log("CAMERA FORWARD: " + bugs[0].GetComponent<SlopeDetector>().cameraForward);
+        Debug.Log("CAMERA RIGHT: " + bugs[0].GetComponent<SlopeDetector>().cameraRight);
+
+        // Demo curtain close
+        if (Input.GetKey(KeyCode.P))
+        {
+            StartCoroutine(CloseCurtains());
         }
     }
 }
