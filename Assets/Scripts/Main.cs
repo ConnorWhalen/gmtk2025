@@ -63,7 +63,7 @@ public class Main : MonoBehaviour
     public PhysicsMaterial bugPhysicsMaterial;
     public GameObject center;
 
-    private float InputForce = 12.0f;
+    private float InputForce = 48.0f;
     private float JumpForce = 1.0f;
 
     public int playerScore;
@@ -73,6 +73,8 @@ public class Main : MonoBehaviour
     public GameObject howToText;
     private bool showHowTo = true;
     
+    private Vector3 Level2CameraPosition = new Vector3(0.0f, 97.9f, -918.6f);
+
     List<GameObject> bugs = new List<GameObject>();
     List<Vector3> bugGroundNormals = new List<Vector3>();
     List<Rigidbody> rigidBodies = new List<Rigidbody>();
@@ -259,7 +261,7 @@ public class Main : MonoBehaviour
             float leaderAngle = Mathf.Rad2Deg * Mathf.Atan2(-bugCentroid.x, -bugCentroid.z);
             if (leaderAngle - center.transform.localEulerAngles.y > 180.0f) leaderAngle -= 360.0f;
             if (leaderAngle - center.transform.localEulerAngles.y < -180.0f) leaderAngle += 360.0f;
-            center.transform.localEulerAngles = new Vector3(0.0f, leaderAngle*0.01f + center.transform.localEulerAngles.y*0.99f, 0.0f);
+            center.transform.localEulerAngles = new Vector3(0.0f, leaderAngle*0.05f + center.transform.localEulerAngles.y*0.95f, 0.0f);
             center.transform.localPosition = new Vector3(center.transform.localPosition.x, bugCentroid.y - 50.0f, center.transform.localPosition.z);
         }
 
