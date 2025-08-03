@@ -63,8 +63,8 @@ public class Main : MonoBehaviour
     public PhysicsMaterial bugPhysicsMaterial;
     public GameObject center;
 
-    private float InputForce = 500.0f;
-    private float JumpForce = 150.0f;
+    private float InputForce = 200.0f;
+    private float JumpForce = 50.0f;
 
     public int playerScore;
     public GameObject scoreText;
@@ -132,11 +132,11 @@ public class Main : MonoBehaviour
             rightFoots.Add(Instantiate(foot));
             rightFoots[bugIndex].transform.parent = bodys[bugIndex].transform;
 
-            bodys[bugIndex].transform.position = new Vector3(0.0f, 0.8f, 0.0f);
-            leftFoots[bugIndex].transform.position = new Vector3(0.0f, 0.0f, 0.1f);
-            rightFoots[bugIndex].transform.position = new Vector3(0.0f, 0.0f, -0.1f);
-            leftHands[bugIndex].transform.position = new Vector3(0.0f, 0.8f, 0.1f);
-            rightHands[bugIndex].transform.position = new Vector3(0.0f, 0.8f, -0.1f);
+            bodys[bugIndex].transform.position = new Vector3(0.0f, 1.0f, 0.0f);
+            leftFoots[bugIndex].transform.position = new Vector3(0.0f, -4.0f, 0.1f);
+            rightFoots[bugIndex].transform.position = new Vector3(0.0f, -4.0f, -0.1f);
+            leftHands[bugIndex].transform.position = new Vector3(0.0f, 0.0f, 1.0f);
+            rightHands[bugIndex].transform.position = new Vector3(0.0f, 0.0f, -1.0f);
         }
         //mainCamera.transform.parent = center.transform;
 
@@ -320,7 +320,7 @@ public class Main : MonoBehaviour
             SlopeDetector sd = bug.GetComponent<SlopeDetector>();
             if (sd.isGrounded)
             {
-                //rb.AddForce(2.0f * (bugCentroid - rb.transform.position), ForceMode.Force);
+                rb.AddForce(bugCentroid - rb.transform.position, ForceMode.Force);
                 if (doLeft)
                 {
                     rb.AddForce(-sd.groundRight * InputForce);
