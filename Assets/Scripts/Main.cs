@@ -306,7 +306,10 @@ public class Main : MonoBehaviour
             }
             bodys[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.8f, 0.0f);
             bodys[bugIndex].transform.localEulerAngles = center.transform.localEulerAngles;
-            bodys[bugIndex].transform.RotateAround(bugs[bugIndex].transform.position, Vector3.up, center.transform.localEulerAngles.y);
+
+            SlopeDetector sd = bugs[bugIndex].GetComponent<SlopeDetector>();
+            float groundAngle = Mathf.Atan2(sd.groundUp.y, Mathf.Sqrt(sd.groundUp.z*sd.groundUp.z + sd.groundUp.x * sd.groundUp.x )) * Mathf.Rad2Deg;
+            bodys[bugIndex].transform.RotateAround(bodys[bugIndex].transform.position, mainCamera.forward, center.transform.localEulerAngles.y);
         }
 
         bool doLeft = Input.GetKey(KeyCode.A);
