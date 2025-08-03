@@ -76,6 +76,7 @@ public class Main : MonoBehaviour
     private Vector3 Level2CameraPosition = new Vector3(0.0f, 97.9f, -918.6f);
 
     private bool transitionPlaying = false;
+    private Vector3 bugCentroid = new Vector3(0.0f, 0.0f, 0.0f);
 
     List<GameObject> bugs = new List<GameObject>();
     List<Vector3> bugGroundNormals = new List<Vector3>();
@@ -103,9 +104,9 @@ public class Main : MonoBehaviour
             int row = bugIndex / root;
             int column = bugIndex % root;
 
-            float xPosition = centerX - (row * step) + width/2.0f;
+            float xPosition = centerX - (row * step) + width / 2.0f;
             float yPosition = 10.0f;
-            float zPosition = centerZ + (column * step) - length/2.0f;
+            float zPosition = centerZ + (column * step) - length / 2.0f;
 
             bugs.Add(new GameObject("bug" + bugIndex.ToString()));
             bugs[bugIndex].transform.position = new Vector3(xPosition, yPosition, zPosition);
@@ -123,9 +124,19 @@ public class Main : MonoBehaviour
 
             bodys.Add(Instantiate(body));
             leftHands.Add(Instantiate(hand));
+            leftHands[bugIndex].transform.parent = bodys[bugIndex].transform;
             rightHands.Add(Instantiate(hand));
+            rightHands[bugIndex].transform.parent = bodys[bugIndex].transform;
             leftFoots.Add(Instantiate(foot));
+            leftFoots[bugIndex].transform.parent = bodys[bugIndex].transform;
             rightFoots.Add(Instantiate(foot));
+            rightFoots[bugIndex].transform.parent = bodys[bugIndex].transform;
+
+            bodys[bugIndex].transform.position = new Vector3(0.0f, 0.8f, 0.0f);
+            leftFoots[bugIndex].transform.position = new Vector3(0.0f, 0.0f, 0.1f);
+            rightFoots[bugIndex].transform.position = new Vector3(0.0f, 0.0f, -0.1f);
+            leftHands[bugIndex].transform.position = new Vector3(0.0f, 0.8f, 0.1f);
+            rightHands[bugIndex].transform.position = new Vector3(0.0f, 0.8f, -0.1f);
         }
         mainCamera.transform.parent = center.transform;
 
@@ -245,19 +256,23 @@ public class Main : MonoBehaviour
 
     void Update()
     {
-        Vector3 bugCentroid = new Vector3(0.0f, 0.0f, 0.0f);
+        bugCentroid = new Vector3(0.0f, 0.0f, 0.0f);
         for (int bugIndex = 0; bugIndex < bugs.Count; bugIndex++)
         {
-            bodys[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.8f, 0.0f);
-            leftFoots[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.0f, 0.1f);
-            rightFoots[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.0f, -0.1f);
-            leftHands[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.8f, 0.1f);
-            rightHands[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.8f, -0.1f);
-
             bugCentroid += bugs[bugIndex].transform.position;
         }
         bugCentroid /= bugs.Count;
 
+        for (int bugIndex = 0; bugIndex < bugs.Count; bugIndex++)
+        {
+            float bugDistance = Vector3.Distance(bugs[bugIndex].transform.position, bugCentroid);
+            if (bugDistance > 100.0f)
+            {
+                Destroy(bugs[bugIndex]);
+                bugs.RemoveAt(bugIndex);
+            }
+            bodys[bugIndex].transform.position = bugs[bugIndex].transform.position +  new Vector3(0.0f, 0.8f, 0.0f);
+        }
         playerScore = bugs.Count;
         if (scoreText.activeInHierarchy)
         {
@@ -292,6 +307,7 @@ public class Main : MonoBehaviour
             }
         }
 
+
         bool doLeft = Input.GetKey(KeyCode.A);
         bool doRight = Input.GetKey(KeyCode.D);
         bool doUp = Input.GetKey(KeyCode.W);
@@ -303,7 +319,7 @@ public class Main : MonoBehaviour
             SlopeDetector sd = bug.GetComponent<SlopeDetector>();
             if (sd.isGrounded)
             {
-
+                rb.AddForce(bugCentroid - rb.transform.position, ForceMode.Force);
                 if (doLeft)
                 {
                     rb.AddForce(-sd.groundRight * InputForce, ForceMode.Force);
@@ -342,12 +358,12 @@ public class Main : MonoBehaviour
                     jumpVector += sd.groundForward;
                 }
                 rb.AddForce(JumpForce * sd.groundUp, ForceMode.Impulse);
+                sd.isGrounded = false;
+                sd.groundUp = Vector3.up;
+                sd.groundRight = Vector3.right;
+                sd.groundForward = Vector3.forward;
             }
         }
-        sd.isGrounded = false;
-        sd.groundUp = Vector3.up;
-        sd.groundRight = Vector3.right;
-        sd.groundForward = Vector3.forward;
 
         // Debug.Log("CAMERA FORWARD: " + bugs[0].GetComponent<SlopeDetector>().cameraForward);
         // Debug.Log("CAMERA RIGHT: " + bugs[0].GetComponent<SlopeDetector>().cameraRight);
