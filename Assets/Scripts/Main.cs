@@ -132,9 +132,9 @@ public class Main : MonoBehaviour
             rightFoots.Add(Instantiate(foot));
             rightFoots[bugIndex].transform.parent = bodys[bugIndex].transform;
 
-            bodys[bugIndex].transform.position = new Vector3(0.0f, 1.0f, 0.0f);
-            leftFoots[bugIndex].transform.position = new Vector3(0.0f, -1.0f, 0.1f);
-            rightFoots[bugIndex].transform.position = new Vector3(0.0f, -1.0f, -0.1f);
+            bodys[bugIndex].transform.position = new Vector3(0.0f, 4.0f, 0.0f);
+            leftFoots[bugIndex].transform.position = new Vector3(0.0f, -4.0f, 1.0f);
+            rightFoots[bugIndex].transform.position = new Vector3(0.0f, -4.0f, -1.0f);
             leftHands[bugIndex].transform.position = new Vector3(0.0f, 0.0f, 1.0f);
             rightHands[bugIndex].transform.position = new Vector3(0.0f, 0.0f, -1.0f);
         }
