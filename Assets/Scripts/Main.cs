@@ -64,7 +64,7 @@ public class Main : MonoBehaviour
     public GameObject center;
 
     private float InputForce = 500.0f;
-    private float JumpForce = 100.0f;
+    private float JumpForce = 150.0f;
 
     public int playerScore;
     public GameObject scoreText;
@@ -111,16 +111,16 @@ public class Main : MonoBehaviour
             bugs.Add(new GameObject("bug" + bugIndex.ToString()));
             bugs[bugIndex].transform.position = new Vector3(xPosition, yPosition, zPosition);
             SphereCollider sphereCollider = bugs[bugIndex].AddComponent<SphereCollider>();
-            sphereCollider.radius = 6.0f;
+            sphereCollider.radius = 4.0f;
             sphereCollider.material = bugPhysicsMaterial;
             bugs[bugIndex].AddComponent<SlopeDetector>();
 
             rigidBodies.Add(bugs[bugIndex].AddComponent<Rigidbody>());
             rigidBodies[bugIndex].useGravity = true;
-            rigidBodies[bugIndex].mass = 0.5f;
+            rigidBodies[bugIndex].mass = 1.0f;
             rigidBodies[bugIndex].isKinematic = false;
-            rigidBodies[bugIndex].linearDamping = 1.0f;
-            rigidBodies[bugIndex].angularDamping = 0.0f;
+            rigidBodies[bugIndex].linearDamping = 0.01f;
+            rigidBodies[bugIndex].angularDamping = 1.0f;
 
             bodys.Add(Instantiate(body));
             leftHands.Add(Instantiate(hand));
@@ -138,7 +138,7 @@ public class Main : MonoBehaviour
             leftHands[bugIndex].transform.position = new Vector3(0.0f, 0.8f, 0.1f);
             rightHands[bugIndex].transform.position = new Vector3(0.0f, 0.8f, -0.1f);
         }
-        mainCamera.transform.parent = center.transform;
+        //mainCamera.transform.parent = center.transform;
 
         // backrow
         for (int audienceIndex = 0; audienceIndex < 18; audienceIndex++)
@@ -256,23 +256,6 @@ public class Main : MonoBehaviour
 
     void Update()
     {
-        bugCentroid = new Vector3(0.0f, 0.0f, 0.0f);
-        for (int bugIndex = 0; bugIndex < bugs.Count; bugIndex++)
-        {
-            bugCentroid += bugs[bugIndex].transform.position;
-        }
-        bugCentroid /= bugs.Count;
-
-        for (int bugIndex = 0; bugIndex < bugs.Count; bugIndex++)
-        {
-            float bugDistance = Vector3.Distance(bugs[bugIndex].transform.position, bugCentroid);
-            if (bugDistance > 100.0f)
-            {
-                Destroy(bugs[bugIndex]);
-                bugs.RemoveAt(bugIndex);
-            }
-            bodys[bugIndex].transform.position = bugs[bugIndex].transform.position +  new Vector3(0.0f, 0.8f, 0.0f);
-        }
         playerScore = bugs.Count;
         if (scoreText.activeInHierarchy)
         {
@@ -285,7 +268,7 @@ public class Main : MonoBehaviour
             if (leaderAngle - center.transform.localEulerAngles.y > 180.0f) leaderAngle -= 360.0f;
             if (leaderAngle - center.transform.localEulerAngles.y < -180.0f) leaderAngle += 360.0f;
             center.transform.localEulerAngles = new Vector3(0.0f, leaderAngle*0.05f + center.transform.localEulerAngles.y*0.95f, 0.0f);
-            center.transform.localPosition = new Vector3(center.transform.localPosition.x, bugCentroid.y - 50.0f, center.transform.localPosition.z);
+            center.transform.localPosition = new Vector3(center.transform.localPosition.x, bugCentroid.y, center.transform.localPosition.z);
         }
 
         foreach (GameObject bug in bugs)
@@ -306,6 +289,24 @@ public class Main : MonoBehaviour
                 bugs.RemoveAt(bugIndex);
             }
         }
+        bugCentroid = new Vector3(0.0f, 0.0f, 0.0f);
+        for (int bugIndex = 0; bugIndex < bugs.Count; bugIndex++)
+        {
+            bugCentroid += bugs[bugIndex].transform.position;
+        }
+        bugCentroid /= bugs.Count;
+
+        for (int bugIndex = 0; bugIndex < bugs.Count; bugIndex++)
+        {
+            float bugDistance = Vector3.Distance(bugs[bugIndex].transform.position, bugCentroid);
+            if (bugDistance > 200.0f || bugs[bugIndex].transform.position.y < 0.0f)
+            {
+                Destroy(bugs[bugIndex]);
+                bugs.RemoveAt(bugIndex);
+            }
+            bodys[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.8f, 0.0f);
+            bodys[bugIndex].transform.localEulerAngles = center.transform.localEulerAngles;
+        }
 
 
         bool doLeft = Input.GetKey(KeyCode.A);
@@ -319,22 +320,22 @@ public class Main : MonoBehaviour
             SlopeDetector sd = bug.GetComponent<SlopeDetector>();
             if (sd.isGrounded)
             {
-                rb.AddForce(bugCentroid - rb.transform.position, ForceMode.Force);
+                //rb.AddForce(2.0f * (bugCentroid - rb.transform.position), ForceMode.Force);
                 if (doLeft)
                 {
-                    rb.AddForce(-sd.groundRight * InputForce, ForceMode.Force);
+                    rb.AddForce(-sd.groundRight * InputForce);
                 }
                 if (doRight)
                 {
-                    rb.AddForce(sd.groundRight * InputForce, ForceMode.Force);
+                    rb.AddForce(sd.groundRight * InputForce);
                 }
                 if (doUp)
                 {
-                    rb.AddForce(sd.groundForward * InputForce, ForceMode.Force);
+                    rb.AddForce(sd.groundForward * InputForce);
                 }
                 if (doDown)
                 {
-                    rb.AddForce(-sd.groundForward * InputForce, ForceMode.Force);
+                    rb.AddForce(-sd.groundForward * InputForce);
                 }
             }
 
