@@ -133,8 +133,8 @@ public class Main : MonoBehaviour
             rightFoots[bugIndex].transform.parent = bodys[bugIndex].transform;
 
             bodys[bugIndex].transform.position = new Vector3(0.0f, 1.0f, 0.0f);
-            leftFoots[bugIndex].transform.position = new Vector3(0.0f, -4.0f, 0.1f);
-            rightFoots[bugIndex].transform.position = new Vector3(0.0f, -4.0f, -0.1f);
+            leftFoots[bugIndex].transform.position = new Vector3(0.0f, -1.0f, 0.1f);
+            rightFoots[bugIndex].transform.position = new Vector3(0.0f, -1.0f, -0.1f);
             leftHands[bugIndex].transform.position = new Vector3(0.0f, 0.0f, 1.0f);
             rightHands[bugIndex].transform.position = new Vector3(0.0f, 0.0f, -1.0f);
         }
@@ -306,8 +306,8 @@ public class Main : MonoBehaviour
             }
             bodys[bugIndex].transform.position = bugs[bugIndex].transform.position + new Vector3(0.0f, 0.8f, 0.0f);
             bodys[bugIndex].transform.localEulerAngles = center.transform.localEulerAngles;
+            bodys[bugIndex].transform.RotateAround(bugs[bugIndex].transform.position, Vector3.up, center.transform.localEulerAngles.y);
         }
-
 
         bool doLeft = Input.GetKey(KeyCode.A);
         bool doRight = Input.GetKey(KeyCode.D);
