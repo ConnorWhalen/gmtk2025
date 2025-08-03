@@ -40,9 +40,9 @@ public class SlopeDetector : MonoBehaviour
             groundRight = Vector3.Cross(groundUp, cameraForward).normalized;
             groundForward = -Vector3.Cross(groundUp, cameraRight).normalized;
             totalPosition /= contactCount;
-            Debug.DrawRay(totalPosition, groundUp * 1, Color.red);
-            Debug.DrawRay(totalPosition, groundRight * 1, Color.green);
-            Debug.DrawRay(totalPosition, groundForward * 1, Color.blue);
+            Debug.DrawRay(totalPosition, groundUp * 10, Color.red);
+            Debug.DrawRay(totalPosition, groundRight * 10, Color.green);
+            Debug.DrawRay(totalPosition, groundForward * 10, Color.blue);
         }
         else if (other.CompareTag("Kill"))
         {
