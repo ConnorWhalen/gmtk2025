@@ -308,8 +308,10 @@ public class Main : MonoBehaviour
             bodys[bugIndex].transform.localEulerAngles = center.transform.localEulerAngles;
 
             SlopeDetector sd = bugs[bugIndex].GetComponent<SlopeDetector>();
-            float groundAngle = Mathf.Atan2(sd.groundUp.y, Mathf.Sqrt(sd.groundUp.z*sd.groundUp.z + sd.groundUp.x * sd.groundUp.x )) * Mathf.Rad2Deg;
-            bodys[bugIndex].transform.RotateAround(bodys[bugIndex].transform.position, mainCamera.forward, center.transform.localEulerAngles.y);
+            float rightComponent = Vector3.Dot(sd.groundUp, mainCamera.transform.right);
+            float upComponent = Vector3.Dot(sd.groundUp, mainCamera.transform.up);
+            float groundAngle = Mathf.Atan2(rightComponent, upComponent);
+            bodys[bugIndex].transform.RotateAround(bodys[bugIndex].transform.position, mainCamera.transform.forward, -groundAngle * Mathf.Rad2Deg);
         }
 
         bool doLeft = Input.GetKey(KeyCode.A);
