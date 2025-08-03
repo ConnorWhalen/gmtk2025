@@ -370,10 +370,10 @@ public class Main : MonoBehaviour
         // Debug.Log("CAMERA RIGHT: " + bugs[0].GetComponent<SlopeDetector>().cameraRight);
 
         // Demo curtain close
-        if (Input.GetKey(KeyCode.P))
-        {
-            StartCoroutine(CloseCurtains());
-        }
+        // if (Input.GetKey(KeyCode.P))
+        // {
+        //     StartCoroutine(CloseCurtains());
+        // }
 
         bool transitionPlayingNow = GameObject.Find("SongTransition").GetComponent<AudioSource>().isPlaying;
         if (transitionPlaying && !transitionPlayingNow)
